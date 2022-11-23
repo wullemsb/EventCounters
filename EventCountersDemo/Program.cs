@@ -26,6 +26,8 @@ public sealed class MigratedRecordsCounterSource : EventSource
 {
     public static readonly MigratedRecordsCounterSource Log = new();
     private PollingCounter _migratedRecordsCounter;
+    private IncrementingPollingCounter _migratedRecordsRateCounter;
+
     private long _migratedRecordsCount = 0;
 
     private MigratedRecordsCounterSource()
@@ -33,6 +35,11 @@ public sealed class MigratedRecordsCounterSource : EventSource
         _migratedRecordsCounter = new PollingCounter("migrated-records-count", this, () => Interlocked.Read(ref _migratedRecordsCount))
         {
             DisplayName = "Migration Count"
+        };
+        _migratedRecordsRateCounter = new IncrementingPollingCounter("records-migration-rate", this, () => Interlocked.Read(ref _migratedRecordsCount))
+        {
+            DisplayName = "Records Migration Rate",
+            DisplayRateTimeScale = TimeSpan.FromMinutes(1)
         };
     }
 
